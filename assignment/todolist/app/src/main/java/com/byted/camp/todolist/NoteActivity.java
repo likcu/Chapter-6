@@ -1,7 +1,9 @@
 package com.byted.camp.todolist;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -10,6 +12,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.byted.camp.todolist.beans.State;
+import com.byted.camp.todolist.db.TodoContract;
+import com.byted.camp.todolist.db.TodoDbHelper;
 
 public class NoteActivity extends AppCompatActivity {
 
@@ -63,6 +69,22 @@ public class NoteActivity extends AppCompatActivity {
 
     private boolean saveNote2Database(String content) {
         // TODO 插入一条新数据，返回是否插入成功
+        TodoDbHelper todoDbHelper = new TodoDbHelper(this);
+        SQLiteDatabase db = todoDbHelper.getWritableDatabase();
+
+        if(db != null && !TextUtils.isEmpty(content)){
+            ContentValues values = new ContentValues();
+
+            values.put(TodoContract.TodoEntry.COLUMN_CONTENT, content);
+            values.put(TodoContract.TodoEntry.COLUMN_STATE, State.TODO.intValue);
+            values.put(TodoContract.TodoEntry.COLUMN_DATE, System.currentTimeMillis());
+
+            long returnValues = db.insert(TodoContract.TodoEntry.TABLE_NAME, null, values);
+
+            return (returnValues != -1);
+        }
+
+        db.close();
         return false;
     }
 }
